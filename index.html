@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đuổi Hình Bắt Chữ</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Lucide Icons - SVG icon library -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+  </head>
+  <body>
+    <!-- ===== GIF BACKGROUND ===== -->
+    <div class="game-background"></div>
+
+    <!-- ===== MAIN WRAPPER ===== -->
+    <div class="main-wrapper">
+      <!-- Title -->
+      <div class="game-title">
+        <h1>
+          <i data-lucide="puzzle" class="icon-title"></i>
+          Đuổi Hình Bắt Chữ
+        </h1>
+        <div class="subtitle">Nhìn hình - Ghép chữ - Đoán từ!</div>
+      </div>
+
+      <!-- ===== START SCREEN ===== -->
+      <div class="cartoon-panel start-screen" id="startScreen">
+        <div class="mascot">
+          <i data-lucide="gamepad-2" class="icon-mascot"></i>
+        </div>
+        <h2>Bạn sẵn sàng chưa?</h2>
+        <ul class="rules">
+          <li>
+            <i data-lucide="image" class="icon-rule"></i>
+            Nhìn hình ảnh gợi ý
+          </li>
+          <li>
+            <i data-lucide="text-cursor-input" class="icon-rule"></i>
+            Chọn chữ cái để ghép vào ô trống
+          </li>
+          <li>
+            <i data-lucide="trophy" class="icon-rule"></i>
+            Mỗi câu đúng được <strong> + 100 điểm</strong>
+          </li>
+          <li>
+            <i data-lucide="lightbulb" class="icon-rule"></i>
+            Dùng gợi ý sẽ <strong> - 20 điểm</strong>
+          </li>
+          <!-- <li>
+            <i data-lucide="keyboard" class="icon-rule"></i>
+            Gõ bàn phím để chọn chữ nhanh hơn!
+          </li> -->
+        </ul>
+        <button class="btn-cartoon btn-play" onclick="startGame()">
+          <i data-lucide="play" class="icon-btn"></i>
+          Bắt Đầu Chơi
+        </button>
+        <br /><br />
+        <button
+          class="btn-cartoon btn-skip"
+          onclick="openSettings()"
+          style="font-size: 0.9rem; padding: 8px 20px"
+        >
+          <i data-lucide="settings" class="icon-btn-sm"></i>
+          Cài đặt
+        </button>
+      </div>
+
+      <!-- ===== STATS BAR ===== -->
+      <div class="stats-bar hidden" id="statsBar">
+        <div class="stat-item">
+          <i data-lucide="trophy" class="icon-stat"></i>
+          <span>Điểm: <span class="stat-value" id="scoreValue">0</span></span>
+        </div>
+        <div class="stat-item">
+          <i data-lucide="hash" class="icon-stat"></i>
+          <span
+            >Câu: <span class="stat-value" id="currentQ">1</span>/<span
+              id="totalQ"
+              >0</span
+            ></span
+          >
+        </div>
+        <div class="stat-item">
+          <i data-lucide="lightbulb" class="icon-stat"></i>
+          <span>Gợi ý: <span class="stat-value" id="hintsLeft">3</span></span>
+        </div>
+      </div>
+
+      <!-- ===== GAME CONTAINER ===== -->
+      <div class="cartoon-panel game-container hidden" id="gameContainer">
+        <!-- Progress -->
+        <div class="progress-container">
+          <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+        </div>
+
+        <!-- Level Info -->
+        <div class="level-info">
+          <span class="level-badge" id="levelBadge">
+            <i data-lucide="star" class="icon-badge"></i>
+            <span>Câu 1</span>
+          </span>
+        </div>
+
+        <!-- Image Display -->
+        <div class="image-area" id="imageArea">
+          <!-- Image loaded dynamically -->
+        </div>
+        <div class="hint-bubble" id="hintBubble"></div>
+
+        <!-- Answer Boxes -->
+        <div class="answer-section">
+          <div class="answer-boxes" id="answerBoxes">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Letter Tiles -->
+        <div class="letters-section">
+          <div class="letters-grid" id="lettersGrid">
+            <!-- Generated dynamically -->
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="actions" id="actionButtons">
+          <button class="btn-cartoon btn-hint" onclick="useHint()">
+            <i data-lucide="lightbulb" class="icon-btn"></i>
+            Gợi ý <span class="hint-badge" id="hintCountBtn">3</span>
+          </button>
+          <button class="btn-cartoon btn-clear" onclick="clearAnswer()">
+            <i data-lucide="trash-2" class="icon-btn"></i>
+            Xóa hết
+          </button>
+          <button class="btn-cartoon btn-skip" onclick="skipLevel()">
+            <i data-lucide="skip-forward" class="icon-btn"></i>
+            Bỏ qua
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== SUCCESS OVERLAY ===== -->
+      <div class="success-overlay" id="successOverlay">
+        <div class="cartoon-panel success-panel">
+          <div class="star-icon">
+            <i data-lucide="award" class="icon-success"></i>
+          </div>
+          <h2 id="successText">Chính xác!</h2>
+          <div class="answer-reveal" id="successAnswer"></div>
+          <div class="points-text" id="successPoints"></div>
+          <button class="btn-cartoon btn-next" onclick="nextLevel()">
+            <i data-lucide="arrow-right" class="icon-btn"></i>
+            Câu tiếp theo
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== GAME OVER ===== -->
+      <div class="cartoon-panel gameover-screen hidden" id="gameOverScreen">
+        <div class="trophy">
+          <i data-lucide="crown" class="icon-trophy"></i>
+        </div>
+        <h2>Hoàn thành xuất sắc!</h2>
+        <div class="final-stats">
+          <div class="final-stat-card">
+            <div class="label">
+              <i data-lucide="star" class="icon-label"></i> Tổng điểm
+            </div>
+            <div class="value" id="finalScore">0</div>
+          </div>
+          <div class="final-stat-card">
+            <div class="label">
+              <i data-lucide="check-circle" class="icon-label"></i> Câu đúng
+            </div>
+            <div class="value" id="correctCount">0</div>
+          </div>
+          <div class="final-stat-card">
+            <div class="label">
+              <i data-lucide="target" class="icon-label"></i> Tỉ lệ
+            </div>
+            <div class="value" id="accuracy">0%</div>
+          </div>
+        </div>
+        <button class="btn-cartoon btn-restart" onclick="restartGame()">
+          <i data-lucide="rotate-ccw" class="icon-btn"></i>
+          Chơi lại
+        </button>
+        <br /><br />
+        <button class="btn-cartoon btn-skip" onclick="backToMenu()">
+          <i data-lucide="home" class="icon-btn"></i>
+          Về trang chủ
+        </button>
+      </div>
+
+      <!-- ===== SETTINGS OVERLAY ===== -->
+      <div class="settings-overlay" id="settingsOverlay">
+        <div class="cartoon-panel settings-panel">
+          <h2>
+            <i data-lucide="settings" class="icon-settings-title"></i>
+            Cài đặt
+          </h2>
+          <div class="setting-group">
+            <label>
+              <i data-lucide="list-ordered" class="icon-label"></i>
+              Số câu hỏi mỗi lượt:
+            </label>
+            <select id="settingQuestions">
+              <option value="8">8 câu (Nhanh)</option>
+              <option value="12" selected>12 câu (Vừa)</option>
+              <option value="15">15 câu (Nhiều)</option>
+              <option value="22">22 câu (Tất cả)</option>
+            </select>
+          </div>
+          <div class="settings-actions">
+            <button
+              class="btn-cartoon btn-play"
+              onclick="applySettings()"
+              style="font-size: 1rem; padding: 10px 24px"
+            >
+              <i data-lucide="check" class="icon-btn-sm"></i>
+              Áp dụng
+            </button>
+            <button
+              class="btn-cartoon btn-settings-close"
+              onclick="closeSettings()"
+              style="font-size: 1rem; padding: 10px 24px"
+            >
+              <i data-lucide="x" class="icon-btn-sm"></i>
+              Đóng
+            </button>
+          </div>
+          <div style="margin-top: 16px; border-top: 1px dashed rgba(0,0,0,0.15); padding-top: 12px; text-align: center;">
+            <a href="admin.html" style="color: var(--text-mid); font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; opacity: 0.85;">
+              <i data-lucide="settings-2" style="width: 15px; height: 15px;"></i>
+              Trang quản lý hình ảnh & câu hỏi
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== CONFETTI ===== -->
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="js/data.js"></script>
+    <script src="js/game.js"></script>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
