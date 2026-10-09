@@ -113,15 +113,25 @@ function playSound(type) {
 }
 
 function getActiveLevels() {
-    try {
-        const saved = localStorage.getItem('CUSTOM_LEVELS');
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        }
-    } catch (e) {}
-    return LEVELS;
+    if (window.cloudLevels && Array.isArray(window.cloudLevels) && window.cloudLevels.length > 0) {
+        return window.cloudLevels;
+    }
+    if (typeof getLocalFallbackLevels === 'function') {
+        return getLocalFallbackLevels();
+    }
+    return (typeof LEVELS !== 'undefined') ? LEVELS : [];
 }
+
+// Tự động đồng bộ từ Firebase Cloud khi mở trang
+window.addEventListener('DOMContentLoaded', async () => {
+    if (typeof fetchCloudLevels === 'function') {
+        try {
+            window.cloudLevels = await fetchCloudLevels();
+        } catch (e) {
+            window.cloudLevels = getActiveLevels();
+        }
+    }
+});
 
 // =================== GAME FLOW ===================
 function startGame() {

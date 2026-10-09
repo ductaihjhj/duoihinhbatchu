@@ -345,9 +345,9 @@
             <i data-lucide="plus-circle"></i>
             Thêm câu hỏi mới
         </button>
-        <button class="btn-admin btn-save" onclick="saveToLocalStorage()">
-            <i data-lucide="save"></i>
-            Lưu vào Game
+        <button class="btn-admin btn-save" onclick="saveChanges()">
+            <i data-lucide="cloud-upload"></i>
+            Lưu lên Đám mây (Mọi thiết bị)
         </button>
         <button class="btn-admin btn-export" onclick="exportDataJs()">
             <i data-lucide="download"></i>
@@ -439,26 +439,23 @@
 </div>
 
 <!-- Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script src="js/firebase-sync.js"></script>
 <script src="js/data.js"></script>
 <script>
     // State quản lý danh sách câu hỏi
     let currentLevels = [];
 
-    // Khởi tạo dữ liệu
-    function initAdmin() {
-        // Ưu tiên đọc từ localStorage nếu có, nếu không lấy từ LEVELS trong data.js
-        const saved = localStorage.getItem('CUSTOM_LEVELS');
-        if (saved) {
-            try {
-                currentLevels = JSON.parse(saved);
-                document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu tùy chỉnh trong trình duyệt';
-            } catch (e) {
-                currentLevels = [...LEVELS];
-                document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
-            }
-        } else {
-            currentLevels = [...LEVELS];
-            document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
+    // Khởi tạo dữ liệu từ Firebase Cloud
+    async function initAdmin() {
+        document.getElementById('storageStatus').textContent = '• Đang tải dữ liệu từ Đám mây (Firebase Cloud)...';
+        try {
+            currentLevels = await fetchCloudLevels();
+            document.getElementById('storageStatus').textContent = '• 🟢 Đã kết nối Đám mây (Firebase) - Mọi thiết bị sẽ nhận thay đổi!';
+        } catch (e) {
+            currentLevels = getLocalFallbackLevels();
+            document.getElementById('storageStatus').textContent = '• 🟡 Đang dùng dữ liệu bộ nhớ đệm (Chưa kết nối Cloud)';
         }
 
         renderQuestions();
@@ -593,7 +590,7 @@
 
         closeModal();
         renderQuestions();
-        saveToLocalStorage(true); // Tự động lưu ngầm
+        saveChanges(true); // Tự động lưu lên Cloud
     }
 
     // Xóa câu hỏi
@@ -601,26 +598,35 @@
         if (confirm(`Bạn có chắc muốn xóa câu hỏi "${currentLevels[index].answer}" không?`)) {
             currentLevels.splice(index, 1);
             renderQuestions();
-            saveToLocalStorage(true);
+            saveChanges(true);
             showToast('Đã xóa câu hỏi!');
         }
     }
 
-    // Lưu vào LocalStorage của game
-    function saveToLocalStorage(silent = false) {
-        localStorage.setItem('CUSTOM_LEVELS', JSON.stringify(currentLevels));
-        document.getElementById('storageStatus').textContent = '• Đã lưu vào trình duyệt (Game sẽ tự áp dụng ngay!)';
-        if (!silent) showToast('Đã lưu thành công vào Game!');
+    // Lưu vào Firebase Cloud (Áp dụng cho mọi thiết bị)
+    async function saveChanges(silent = false) {
+        if (!silent) showToast('Đang lưu lên Firebase Cloud...');
+        try {
+            await saveCloudLevels(currentLevels);
+            document.getElementById('storageStatus').textContent = '• 🟢 Đã lưu lên Đám mây (Firebase) - Mọi thiết bị đã được đồng bộ!';
+            if (!silent) showToast('Đã lưu thành công lên toàn bộ thiết bị!');
+        } catch (err) {
+            console.error("Lỗi lưu Cloud:", err);
+            try {
+                localStorage.setItem('CUSTOM_LEVELS', JSON.stringify(currentLevels));
+            } catch (e) {}
+            document.getElementById('storageStatus').textContent = '• ⚠️ Không thể kết nối Cloud, đã lưu tạm trên trình duyệt';
+            if (!silent) showToast('Đã lưu tạm trên máy (Chưa đồng bộ Cloud)!');
+        }
     }
 
     // Khôi phục mặc định
-    function confirmResetDefaults() {
-        if (confirm('Khôi phục lại toàn bộ danh sách 22 câu hỏi ban đầu?')) {
-            localStorage.removeItem('CUSTOM_LEVELS');
+    async function confirmResetDefaults() {
+        if (confirm('Khôi phục lại toàn bộ danh sách 22 câu hỏi ban đầu trên TOÀN BỘ THIẾT BỊ?')) {
             currentLevels = [...LEVELS];
-            document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
+            await saveChanges(true);
             renderQuestions();
-            showToast('Đã khôi phục dữ liệu gốc!');
+            showToast('Đã khôi phục dữ liệu gốc trên toàn hệ thống!');
         }
     }
 
