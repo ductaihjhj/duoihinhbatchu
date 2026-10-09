@@ -23,7 +23,6 @@ const DOM = {
     gameContainer: document.getElementById('gameContainer'),
     successOverlay: document.getElementById('successOverlay'),
     gameOverScreen: document.getElementById('gameOverScreen'),
-    settingsOverlay: document.getElementById('settingsOverlay'),
 
     // Stats
     scoreValue: document.getElementById('scoreValue'),
@@ -521,23 +520,6 @@ function backToMenu() {
     DOM.startScreen.classList.remove('hidden');
 }
 
-// =================== SETTINGS ===================
-function openSettings() {
-    DOM.settingsOverlay.classList.add('show');
-}
-
-function closeSettings() {
-    DOM.settingsOverlay.classList.remove('show');
-}
-
-function applySettings() {
-    const questionsInput = document.getElementById('settingQuestions');
-    if (questionsInput) {
-        GAME_CONFIG.questionsPerRound = parseInt(questionsInput.value) || 12;
-    }
-    closeSettings();
-}
-
 // =================== UPDATE STATS ===================
 function updateStats() {
     DOM.scoreValue.textContent = gameState.score;
@@ -567,7 +549,6 @@ document.addEventListener('keydown', (e) => {
     // Do not process letter keystrokes if not in active gameplay
     if (DOM.gameContainer.classList.contains('hidden')) return;
     if (DOM.successOverlay.classList.contains('show')) return;
-    if (DOM.settingsOverlay.classList.contains('show')) return;
     if (DOM.gameOverScreen.classList.contains('show')) return;
     if (gameState.isChecking) return;
 

@@ -46,23 +46,10 @@
             <i data-lucide="lightbulb" class="icon-rule"></i>
             Dùng gợi ý sẽ <strong> - 20 điểm</strong>
           </li>
-          <!-- <li>
-            <i data-lucide="keyboard" class="icon-rule"></i>
-            Gõ bàn phím để chọn chữ nhanh hơn!
-          </li> -->
         </ul>
         <button class="btn-cartoon btn-play" onclick="startGame()">
           <i data-lucide="play" class="icon-btn"></i>
           Bắt Đầu Chơi
-        </button>
-        <br /><br />
-        <button
-          class="btn-cartoon btn-skip"
-          onclick="openSettings()"
-          style="font-size: 0.9rem; padding: 8px 20px"
-        >
-          <i data-lucide="settings" class="icon-btn-sm"></i>
-          Cài đặt
         </button>
       </div>
 
@@ -192,58 +179,6 @@
         </button>
       </div>
 
-      <!-- ===== SETTINGS OVERLAY ===== -->
-      <div class="settings-overlay" id="settingsOverlay">
-        <div class="cartoon-panel settings-panel">
-          <h2>
-            <i data-lucide="settings" class="icon-settings-title"></i>
-            Cài đặt
-          </h2>
-          <div class="setting-group">
-            <label>
-              <i data-lucide="list-ordered" class="icon-label"></i>
-              Số câu hỏi mỗi lượt:
-            </label>
-            <select id="settingQuestions">
-              <option value="8">8 câu (Nhanh)</option>
-              <option value="12" selected>12 câu (Vừa)</option>
-              <option value="15">15 câu (Nhiều)</option>
-              <option value="22">22 câu (Tất cả)</option>
-            </select>
-          </div>
-          <div class="settings-actions">
-            <button
-              class="btn-cartoon btn-play"
-              onclick="applySettings()"
-              style="font-size: 1rem; padding: 10px 24px"
-            >
-              <i data-lucide="check" class="icon-btn-sm"></i>
-              Áp dụng
-            </button>
-            <button
-              class="btn-cartoon btn-settings-close"
-              onclick="closeSettings()"
-              style="font-size: 1rem; padding: 10px 24px"
-            >
-              <i data-lucide="x" class="icon-btn-sm"></i>
-              Đóng
-            </button>
-          </div>
-          <div
-            style="
-              margin-top: 16px;
-              border-top: 1px dashed rgba(0, 0, 0, 0.15);
-              padding-top: 12px;
-              text-align: center;
-            "
-          >
-            <!-- <a href="config.html" style="color: var(--text-mid); font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; opacity: 0.85;">
-              <i data-lucide="settings-2" style="width: 15px; height: 15px;"></i>
-              Trang quản lý hình ảnh & câu hỏi
-            </a> -->
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- ===== CONFETTI ===== -->
