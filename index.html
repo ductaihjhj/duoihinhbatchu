@@ -230,7 +230,7 @@
             </button>
           </div>
           <div style="margin-top: 16px; border-top: 1px dashed rgba(0,0,0,0.15); padding-top: 12px; text-align: center;">
-            <a href="admin.html" style="color: var(--text-mid); font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; opacity: 0.85;">
+            <a href="config.html" style="color: var(--text-mid); font-size: 0.85rem; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; opacity: 0.85;">
               <i data-lucide="settings-2" style="width: 15px; height: 15px;"></i>
               Trang quản lý hình ảnh & câu hỏi
             </a>
@@ -246,8 +246,12 @@
     <script src="js/data.js"></script>
     <script src="js/game.js"></script>
 
-    <!-- Initialize Lucide Icons -->
+    <!-- Initialize Lucide Icons & Routing -->
     <script>
+      // Hỗ trợ truy cập nhanh qua #config hoặc ?config
+      if (window.location.hash === '#config' || window.location.search.includes('config')) {
+        window.location.replace('config.html');
+      }
       lucide.createIcons();
     </script>
   </body>

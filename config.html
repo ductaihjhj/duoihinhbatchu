@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Câu Hỏi - Đuổi Hình Bắt Chữ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* CSS bổ sung riêng cho trang quản trị Admin */
+        .admin-wrapper {
+            position: relative;
+            z-index: 1;
+            width: 95%;
+            max-width: 1050px;
+            margin: 25px auto 50px;
+        }
+
+        .admin-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .admin-title-box h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            text-shadow: 2px 2px 0 var(--green-dark), 0 3px 8px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-title-box p {
+            color: #fff;
+            font-weight: 600;
+            opacity: 0.9;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .admin-toolbar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+        }
+
+        .btn-admin {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-admin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+
+        .btn-add { background: linear-gradient(180deg, #66BB6A, #4CAF50); border-bottom: 3px solid #2E7D32; }
+        .btn-save { background: linear-gradient(180deg, #42A5F5, #1E88E5); border-bottom: 3px solid #1565C0; }
+        .btn-export { background: linear-gradient(180deg, #FFA726, #FB8C00); border-bottom: 3px solid #EF6C00; }
+        .btn-copy { background: linear-gradient(180deg, #AB47BC, #8E24AA); border-bottom: 3px solid #6A1B9A; }
+        .btn-reset { background: linear-gradient(180deg, #EF5350, #E53935); border-bottom: 3px solid #C62828; }
+        .btn-back { background: rgba(255, 255, 255, 0.45); color: var(--text-dark); border: 1.5px solid rgba(255,255,255,0.7); }
+
+        /* Question Cards Grid */
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+        }
+
+        .q-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            transition: all 0.25s;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .q-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            background: rgba(255, 255, 255, 0.52);
+        }
+
+        .q-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .q-num {
+            background: linear-gradient(180deg, #66BB6A, #4CAF50);
+            color: white;
+            font-weight: 800;
+            font-size: 0.85rem;
+            padding: 3px 12px;
+            border-radius: 50px;
+        }
+
+        .q-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-icon-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            color: white;
+        }
+
+        .btn-icon-action:hover {
+            transform: scale(1.12);
+        }
+
+        .btn-edit { background: #42A5F5; }
+        .btn-del { background: #EF5350; }
+
+        .q-img-box {
+            width: 100%;
+            height: 140px;
+            background: white;
+            border-radius: 14px;
+            border: 2px solid var(--cream-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+
+        .q-img-box img {
+            max-width: 85%;
+            max-height: 85%;
+            object-fit: contain;
+        }
+
+        .q-info {
+            flex-grow: 1;
+        }
+
+        .q-answer {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--green-dark);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .q-hint {
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            line-height: 1.35;
+        }
+
+        .q-letters {
+            background: rgba(255,255,255,0.5);
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-mid);
+            font-weight: 600;
+            word-break: break-all;
+        }
+
+        /* Modal popup */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-box {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(24px);
+            border-radius: 24px;
+            border: 2px solid rgba(255,255,255,0.7);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            width: 92%;
+            max-width: 520px;
+            padding: 26px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-box h2 {
+            font-size: 1.6rem;
+            color: var(--green-dark);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            border: 2px solid #ddd;
+            font-family: 'Be Vietnam Pro', sans-serif;
+            font-size: 0.95rem;
+            background: white;
+            transition: border 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .img-preview-box {
+            width: 100%;
+            height: 120px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+            overflow: hidden;
+        }
+
+        .img-preview-box img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            z-index: 300;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="game-background"></div>
+
+<!-- Admin Wrapper -->
+<div class="admin-wrapper">
+    <!-- Header -->
+    <div class="admin-header">
+        <div class="admin-title-box">
+            <h1>
+                <i data-lucide="settings-2" style="width: 36px; height: 36px;"></i>
+                Quản Lý Hình Ảnh & Câu Hỏi
+            </h1>
+            <p>Trang quản trị câu đố cho game Đuổi Hình Bắt Chữ</p>
+        </div>
+        <a href="index.html" class="btn-admin btn-back">
+            <i data-lucide="gamepad-2"></i>
+            Vào Chơi Game
+        </a>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="admin-toolbar">
+        <button class="btn-admin btn-add" onclick="openAddModal()">
+            <i data-lucide="plus-circle"></i>
+            Thêm câu hỏi mới
+        </button>
+        <button class="btn-admin btn-save" onclick="saveToLocalStorage()">
+            <i data-lucide="save"></i>
+            Lưu vào Game
+        </button>
+        <button class="btn-admin btn-export" onclick="exportDataJs()">
+            <i data-lucide="download"></i>
+            Tải file data.js
+        </button>
+        <button class="btn-admin btn-copy" onclick="copyDataCode()">
+            <i data-lucide="copy"></i>
+            Sao chép mã
+        </button>
+        <button class="btn-admin btn-reset" onclick="confirmResetDefaults()">
+            <i data-lucide="rotate-ccw"></i>
+            Khôi phục mặc định
+        </button>
+    </div>
+
+    <!-- Stats summary -->
+    <div style="margin-bottom: 16px; color: white; font-weight: 700; text-shadow: 1px 1px 2px rgba(0,0,0,0.4);">
+        <span>📊 Tổng cộng: <strong id="totalCount">0</strong> câu hỏi</span>
+        <span id="storageStatus" style="margin-left: 20px; font-weight: 500;"></span>
+    </div>
+
+    <!-- Questions Grid -->
+    <div class="question-grid" id="questionGrid">
+        <!-- Rendered by JavaScript -->
+    </div>
+</div>
+
+<!-- Modal Thêm/Sửa Câu Hỏi -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal-box">
+        <h2 id="modalTitle">
+            <i data-lucide="edit-3"></i>
+            Thêm Câu Hỏi
+        </h2>
+        <form id="questionForm" onsubmit="handleFormSubmit(event)">
+            <input type="hidden" id="editIndex" value="-1">
+
+            <div class="form-group">
+                <label>ĐÁP ÁN (Tiếng Việt có dấu, VD: CHÓ, MÈO, SƯ TỬ):</label>
+                <input type="text" id="inputAnswer" class="form-control" required placeholder="Nhập đáp án..." oninput="this.value = this.value.toUpperCase()">
+            </div>
+
+            <div class="form-group">
+                <label>GỢI Ý:</label>
+                <input type="text" id="inputHint" class="form-control" required placeholder="Ví dụ: Bạn thân của con người">
+            </div>
+
+            <div class="form-group">
+                <label>ĐƯỜNG DẪN HÌNH ẢNH HOẶC URL HOẶC CHỌN FILE:</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="inputImage" class="form-control" placeholder="images/animals/cho.svg hoặc link web" oninput="updateImagePreview()">
+                    <button type="button" class="btn-admin btn-save" style="padding: 0 14px; white-space: nowrap;" onclick="document.getElementById('fileInput').click()">
+                        <i data-lucide="upload"></i>
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileUpload(event)">
+                </div>
+                <div class="img-preview-box" id="imgPreviewBox">
+                    <span style="color: #999;">Xem trước ảnh</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>CÁC CHỮ CÁI NHIỄU (Thêm vào khay để làm khó người chơi):</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="inputExtra" class="form-control" placeholder="VD: BXLKNMP" oninput="this.value = this.value.toUpperCase()">
+                    <button type="button" class="btn-admin btn-export" style="padding: 0 14px; white-space: nowrap;" onclick="autoGenerateExtraLetters()">
+                        <i data-lucide="dices"></i> Tự sinh
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>EMOJI DỰ PHÒNG (Khi ảnh lỗi):</label>
+                <input type="text" id="inputEmoji" class="form-control" placeholder="🐶, 🐱, 🍎...">
+            </div>
+
+            <div class="modal-btns">
+                <button type="button" class="btn-admin btn-back" onclick="closeModal()">Hủy</button>
+                <button type="submit" class="btn-admin btn-add">Lưu Câu Hỏi</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i data-lucide="check-circle"></i>
+    <span id="toastMsg">Thao tác thành công!</span>
+</div>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script>
+    // State quản lý danh sách câu hỏi
+    let currentLevels = [];
+
+    // Khởi tạo dữ liệu
+    function initAdmin() {
+        // Ưu tiên đọc từ localStorage nếu có, nếu không lấy từ LEVELS trong data.js
+        const saved = localStorage.getItem('CUSTOM_LEVELS');
+        if (saved) {
+            try {
+                currentLevels = JSON.parse(saved);
+                document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu tùy chỉnh trong trình duyệt';
+            } catch (e) {
+                currentLevels = [...LEVELS];
+                document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
+            }
+        } else {
+            currentLevels = [...LEVELS];
+            document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
+        }
+
+        renderQuestions();
+    }
+
+    // Hiển thị danh sách câu hỏi
+    function renderQuestions() {
+        const grid = document.getElementById('questionGrid');
+        grid.innerHTML = '';
+        document.getElementById('totalCount').textContent = currentLevels.length;
+
+        currentLevels.forEach((lvl, index) => {
+            const card = document.createElement('div');
+            card.className = 'q-card';
+            card.innerHTML = `
+                <div class="q-card-header">
+                    <span class="q-num">#${index + 1}</span>
+                    <div class="q-actions">
+                        <button class="btn-icon-action btn-edit" title="Sửa" onclick="openEditModal(${index})">
+                            <i data-lucide="edit-2" style="width: 16px; height: 16px;"></i>
+                        </button>
+                        <button class="btn-icon-action btn-del" title="Xóa" onclick="deleteQuestion(${index})">
+                            <i data-lucide="trash" style="width: 16px; height: 16px;"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="q-img-box">
+                    <img src="${lvl.image}" alt="${lvl.hint}" onerror="this.onerror=null; this.src='https://placehold.co/200x150?text=${encodeURIComponent(lvl.emoji || '🖼️')}'">
+                </div>
+                <div class="q-info">
+                    <div class="q-answer">
+                        <span>${lvl.answer}</span>
+                        <span style="font-size: 1.1rem;">${lvl.emoji || ''}</span>
+                    </div>
+                    <div class="q-hint">💡 ${lvl.hint}</div>
+                    <div class="q-letters">🔤 Nhiễu: ${lvl.extraLetters || 'Không'}</div>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+
+        lucide.createIcons();
+    }
+
+    // Modal
+    function openAddModal() {
+        document.getElementById('modalTitle').innerHTML = '<i data-lucide="plus-circle"></i> Thêm Câu Hỏi Mới';
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('questionForm').reset();
+        document.getElementById('imgPreviewBox').innerHTML = '<span style="color: #999;">Xem trước ảnh</span>';
+        document.getElementById('editModal').classList.add('show');
+        lucide.createIcons();
+    }
+
+    function openEditModal(index) {
+        const lvl = currentLevels[index];
+        document.getElementById('modalTitle').innerHTML = `<i data-lucide="edit-3"></i> Sửa Câu Hỏi #${index + 1}`;
+        document.getElementById('editIndex').value = index;
+        document.getElementById('inputAnswer').value = lvl.answer;
+        document.getElementById('inputHint').value = lvl.hint;
+        document.getElementById('inputImage').value = lvl.image;
+        document.getElementById('inputExtra').value = lvl.extraLetters || '';
+        document.getElementById('inputEmoji').value = lvl.emoji || '';
+        updateImagePreview();
+        document.getElementById('editModal').classList.add('show');
+        lucide.createIcons();
+    }
+
+    function closeModal() {
+        document.getElementById('editModal').classList.remove('show');
+    }
+
+    // Cập nhật xem trước ảnh
+    function updateImagePreview() {
+        const val = document.getElementById('inputImage').value.trim();
+        const box = document.getElementById('imgPreviewBox');
+        if (val) {
+            box.innerHTML = `<img src="${val}" onerror="this.onerror=null; this.parentElement.innerHTML='<span style=\\'color:red;\\'>Ảnh không hợp lệ</span>'">`;
+        } else {
+            box.innerHTML = '<span style="color: #999;">Xem trước ảnh</span>';
+        }
+    }
+
+    // Xử lý upload ảnh từ máy (chuyển sang base64 data URL)
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('inputImage').value = e.target.result;
+                updateImagePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Tự sinh chữ cái nhiễu ngẫu nhiên
+    function autoGenerateExtraLetters() {
+        const pool = "AĂÂBCDĐEÊGHIKLMNOÔƠPQRSTUƯVXY";
+        let res = "";
+        for (let i = 0; i < 6; i++) {
+            res += pool[Math.floor(Math.random() * pool.length)];
+        }
+        document.getElementById('inputExtra').value = res;
+    }
+
+    // Lưu form Thêm / Sửa
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        const idx = parseInt(document.getElementById('editIndex').value);
+        const answer = document.getElementById('inputAnswer').value.trim().toUpperCase();
+        const hint = document.getElementById('inputHint').value.trim();
+        let image = document.getElementById('inputImage').value.trim() || 'images/animals/cho.svg';
+        let extra = document.getElementById('inputExtra').value.trim().toUpperCase() || 'ABCDEF';
+        let emoji = document.getElementById('inputEmoji').value.trim() || '⭐';
+
+        const newItem = {
+            image: image,
+            emoji: emoji,
+            answer: answer,
+            hint: hint,
+            extraLetters: extra
+        };
+
+        if (idx === -1) {
+            currentLevels.unshift(newItem); // Thêm vào đầu danh sách
+            showToast('Đã thêm câu hỏi mới!');
+        } else {
+            currentLevels[idx] = newItem;
+            showToast(`Đã cập nhật câu hỏi #${idx + 1}!`);
+        }
+
+        closeModal();
+        renderQuestions();
+        saveToLocalStorage(true); // Tự động lưu ngầm
+    }
+
+    // Xóa câu hỏi
+    function deleteQuestion(index) {
+        if (confirm(`Bạn có chắc muốn xóa câu hỏi "${currentLevels[index].answer}" không?`)) {
+            currentLevels.splice(index, 1);
+            renderQuestions();
+            saveToLocalStorage(true);
+            showToast('Đã xóa câu hỏi!');
+        }
+    }
+
+    // Lưu vào LocalStorage của game
+    function saveToLocalStorage(silent = false) {
+        localStorage.setItem('CUSTOM_LEVELS', JSON.stringify(currentLevels));
+        document.getElementById('storageStatus').textContent = '• Đã lưu vào trình duyệt (Game sẽ tự áp dụng ngay!)';
+        if (!silent) showToast('Đã lưu thành công vào Game!');
+    }
+
+    // Khôi phục mặc định
+    function confirmResetDefaults() {
+        if (confirm('Khôi phục lại toàn bộ danh sách 22 câu hỏi ban đầu?')) {
+            localStorage.removeItem('CUSTOM_LEVELS');
+            currentLevels = [...LEVELS];
+            document.getElementById('storageStatus').textContent = '• Đang dùng dữ liệu gốc từ data.js';
+            renderQuestions();
+            showToast('Đã khôi phục dữ liệu gốc!');
+        }
+    }
+
+    // Xuất file data.js để người dùng lưu vĩnh viễn vào dự án
+    function exportDataJs() {
+        const fileContent = generateDataJsCode();
+        const blob = new Blob([fileContent], { type: 'text/javascript;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'data.js';
+        a.click();
+        showToast('Đang tải file data.js về máy!');
+    }
+
+    // Sao chép mã nguồn data.js vào clipboard
+    function copyDataCode() {
+        const fileContent = generateDataJsCode();
+        navigator.clipboard.writeText(fileContent).then(() => {
+            showToast('Đã sao chép mã data.js vào bộ nhớ tạm!');
+        }).catch(() => {
+            showToast('Không thể sao chép, vui lòng tải file!');
+        });
+    }
+
+    function generateDataJsCode() {
+        return `/* ============================================
+   GAME DATA - DỮ LIỆU CÂU HỎI
+   (Tạo tự động từ Trang Quản Lý)
+   ============================================ */
+
+const LEVELS = ${JSON.stringify(currentLevels, null, 4)};
+
+const GAME_CONFIG = {
+    questionsPerRound: 12,
+    pointsPerCorrect: 100,
+    hintPenalty: 20,
+    totalHints: 3,
+    showImageFallback: true,
+};
+`;
+    }
+
+    // Thông báo Toast
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').textContent = msg;
+        t.style.display = 'flex';
+        lucide.createIcons();
+        setTimeout(() => { t.style.display = 'none'; }, 3000);
+    }
+
+    // Khởi chạy khi load trang
+    window.addEventListener('DOMContentLoaded', initAdmin);
+</script>
+
+</body>
+</html>
